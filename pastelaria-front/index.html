@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pastelaria Front</title>
+  </head>
+  <body>
+    <header>
+      <h1>Pastelaria Front</h1>
+    </header>
+
+    <section>
+      <h1>Pastéis</h1>
+      <p>Aqui estão os pastéis salvos no Banco de Dados.</p>
+      <ul id="pasteis"></ul>
+    </section>
+
+    <section>
+      <h1>Adicionar Pastel</h1>
+      <form action="post">
+        <input
+          type="text"
+          name="nome"
+          id="nomePastel"
+          placeholder="Insira o nome do pastel"
+        />
+
+        <input type="number" name="price" id="price" placeholder="Preço" />
+
+        <button type="button" onclick="criarPastel()">Adicionar</button>
+      </form>
+    </section>
+
+    <section>
+      <h1>Clientes</h1>
+      <p>Aqui estão os clientes salvos no Banco de Dados.</p>
+      <ul id="clientes"></ul>
+    </section>
+
+    <section>
+      <h1>Adicionar Cliente</h1>
+      <form action="post">
+        <input
+          type="text"
+          name="nome"
+          id="nomeCliente"
+          placeholder="Insira o nome do cliente"
+        />
+
+        <input type="email" name="email" id="email" placeholder="Email" />
+
+        <label>Endereço:</label>
+
+        <input type="text" name="rua" id="rua" placeholder="Rua" />
+
+        <input type="number" name="numero" id="numero" placeholder="Número" />
+
+        <input type="text" name="bairro" id="bairro" placeholder="Bairro" />
+
+        <input type="text" name="cidade" id="cidade" placeholder="Cidade" />
+
+        <input type="text" name="estado" id="estado" placeholder="Estado" />
+
+        <input type="text" name="cep" id="cep" placeholder="Cep" />
+
+        <button type="button" onclick="criarCliente()">Adicionar</button>
+      </form>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      onLoadPastel();
+      onLoadCliente();
+
+      async function onLoadPastel() {
+        // consultando a rota /get - pasteis
+        const url = "http://localhost:3000/api/pasteis";
+        try {
+          const response = await axios.get(url);
+          getAllPasteis(response);
+        } catch (error) {
+          //alert("Ops, deu erro na request!");
+          console.error(error);
+        }
+      }
+
+      function buildDeletePastel(item) {
+        const deleteButton = document.createElement("button");
+        deleteButton.innerHTML = "Remover";
+        item.appendChild(deleteButton);
+
+        deleteButton.addEventListener("click", () => {
+          deletePastel(item);
+        });
+      }
+
+      function deletePastel(item) {
+        console.log(item);
+        const pastelId = item.getAttribute("data-id");
+        const url = `http://localhost:3000/api/pastel/${pastelId}`;
+
+        axios
+          .delete(url)
+          .then((response) => {
+            console.log(response);
+            if (response.status === 200) {
+              alert("Pastel removido com sucesso!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      function criarPastel() {
+        const nameField = document.querySelector("#nomePastel").value;
+        const priceField = document.querySelector("#price").value;
+
+        const url = "http://localhost:3000/api/pastel";
+        const data = {
+          name: nameField,
+          price: priceField,
+        };
+
+        axios
+          .post(url, data)
+          .then((response) => {
+            if (response.status === 200) {
+              alert("Pastel adicionado com sucesso!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      function getAllPasteis(response) {
+        const pasteis = response.data;
+        const list = document.getElementById("pasteis");
+
+        pasteis.forEach((pastel) => {
+          const item = document.createElement("li");
+
+          item.setAttribute("data-id", pastel.id);
+
+          item.innerHTML = `${pastel.id} - ${pastel.name} - ${pastel.price}`;
+          list.appendChild(item);
+
+          buildDeletePastel(item);
+        });
+      }
+
+      async function onLoadCliente() {
+        // consultando a rota /get - clientes
+        const url = "http://localhost:3000/api/clientes";
+        try {
+          const response = await axios.get(url);
+          getAllClientes(response);
+        } catch (error) {
+          //alert("Ops, deu erro na request!");
+          console.error(error);
+        }
+      }
+
+      function buildDeleteCliente(item) {
+        const deleteButton = document.createElement("button");
+        deleteButton.innerHTML = "Remover";
+        item.appendChild(deleteButton);
+
+        deleteButton.addEventListener("click", () => {
+          deleteCliente(item);
+        });
+      }
+
+      function deleteCliente(item) {
+        console.log(item);
+        const clienteId = item.getAttribute("data-id");
+        const url = `http://localhost:3000/api/cliente/${clienteId}`;
+
+        axios
+          .delete(url)
+          .then((response) => {
+            console.log(response);
+            if (response.status === 200) {
+              alert("Cliente removido com sucesso!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      function criarCliente() {
+        const nomeField = document.querySelector("#nomeCliente").value;
+        const emailField = document.querySelector("#email").value;
+        const ruaField = document.querySelector("#rua").value;
+        const numeroField = document.querySelector("#numero").value;
+        const bairroField = document.querySelector("#bairro").value;
+        const cidadeField = document.querySelector("#cidade").value;
+        const estadoField = document.querySelector("#estado").value;
+        const cepField = document.querySelector("#cep").value;
+
+        const url = "http://localhost:3000/api/cliente";
+        const data = {
+          nome: nomeField,
+          email: emailField,
+          endereco: {
+            rua: ruaField,
+            numero: numeroField,
+            bairro: bairroField,
+            cidade: cidadeField,
+            estado: estadoField,
+            cep: cepField,
+          },
+        };
+
+        axios
+          .post(url, data)
+          .then((response) => {
+            if (response.status === 200) {
+              alert("Cliente adicionado com sucesso!");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      function getAllClientes(response) {
+        const clientes = response.data;
+        const list = document.getElementById("clientes");
+
+        clientes.forEach((cliente) => {
+          const item = document.createElement("li");
+
+          item.setAttribute("data-id", cliente.id);
+
+          item.innerHTML = `${cliente.id} - ${cliente.nome} - ${cliente.email} - ${cliente.endereco.rua} - ${cliente.endereco.numero} - ${cliente.endereco.bairro} - ${cliente.endereco.cidade} - ${cliente.endereco.estado} - ${cliente.endereco.cep}`;
+          list.appendChild(item);
+
+          buildDeleteCliente(item);
+        });
+      }
+    </script>
+  </body>
+</html>
